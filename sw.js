@@ -1,4 +1,4 @@
-const C='moneyflow-v9-chat-auto-invest-v7';
+const C='moneyflow-v9-premium-v8';
 self.addEventListener('install',e=>{self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())await caches.delete(k);await self.clients.claim();for(const c of await self.clients.matchAll({type:'window',includeUncontrolled:true})){try{c.navigate(c.url)}catch{}}})()));
 function inject(h){const s=`<script>(function(){
@@ -20,5 +20,5 @@ function addBell(){const h=document.querySelector('header .ha');if(!h||document.
 async function autoInvestment(){try{const r=await fetch('/api/fund',{cache:'no-store'}),j=await r.json();if(j.ok&&j.price>0){const old=+(localStorage.getItem('mf_inv_price_agorot')||0);if(old&&old!==j.price)localStorage.setItem('mf_inv_prev_price_agorot',old);localStorage.setItem('mf_inv_price_agorot',j.price);localStorage.setItem('mf_inv_price_updated_at',j.updatedAt||new Date().toISOString());if(typeof renderInvestment==='function')renderInvestment();const label=document.getElementById('invPriceLabel');if(label)label.textContent=j.price.toFixed(2)+' אג׳ · אוטומטי'}}catch{}}
 function init(){hook();addBell();autoInvestment();setInterval(autoInvestment,1800000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoInvestment()});new MutationObserver(()=>{hook();removeOldGrants()}).observe(document.body,{childList:true,subtree:true})}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
-})();<\/script>`;return h.replace('</body>',s+'</body>')}
+})();<\/script>`;return h.replace('</body>',s+'<script src="/addon-v9.js?v=8"></script></body>')}
 self.addEventListener('fetch',e=>{const r=e.request,u=new URL(r.url);if(r.method!=='GET'){e.respondWith(fetch(r));return}if(r.mode==='navigate'||u.pathname==='/'||u.pathname.endsWith('/index.html')){e.respondWith((async()=>{const x=await fetch(r,{cache:'no-store'});return new Response(inject(await x.text()),{status:x.status,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store'}})})());return}e.respondWith(fetch(r))});
