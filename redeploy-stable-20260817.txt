@@ -1,1 +1,1 @@
-stable redeploy trigger 2026-08-17
+stable redeploy trigger 2026-08-17 17:22 Asia/Jerusalem — deploy latest main with safe-ui-v20 and no visible insights
