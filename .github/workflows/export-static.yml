@@ -1,0 +1,28 @@
+name: Export static bundle
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: moneyflow-static
+          path: |
+            index.html
+            addon-v9.js
+            chat-enhance-v1.js
+            history-fix-v15.js
+            history-mobile-fix.js
+            safe-ui-v20.js
+            ui-polish-v10.js
+            manifest.webmanifest
+            sw.js
+            icon-180.png
+            icon-512.png
+            icon-1024.png
+            apple-touch-icon.png
+            api/fund.js
