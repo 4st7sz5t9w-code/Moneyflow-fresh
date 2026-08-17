@@ -1,28 +1,42 @@
-name: Export static bundle
+name: Build standalone MoneyFlow
 on:
   push:
     branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
-  export:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/upload-artifact@v4
-        with:
-          name: moneyflow-static
-          path: |
-            index.html
-            addon-v9.js
-            chat-enhance-v1.js
-            history-fix-v15.js
-            history-mobile-fix.js
-            safe-ui-v20.js
-            ui-polish-v10.js
-            manifest.webmanifest
-            sw.js
-            icon-180.png
-            icon-512.png
-            icon-1024.png
-            apple-touch-icon.png
-            api/fund.js
+      - name: Build standalone HTML
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re, urllib.parse
+          h=Path('index.html').read_text()
+          h=re.sub(r'<link rel="manifest"[^>]*>','',h)
+          h=re.sub(r'<link rel="apple-touch-icon"[^>]*>','',h)
+          h=re.sub(r'<link rel="icon"[^>]*>','',h)
+          svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="42" fill="#0d1828"/><path d="M38 112V68l28 25 24-37 18 25 34-29v60" fill="none" stroke="#43d7c8" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><circle cx="142" cy="52" r="8" fill="#60a5fa"/></svg>'
+          icon='data:image/svg+xml,'+urllib.parse.quote(svg,safe='')
+          h=h.replace('<title>MoneyFlow</title>',f'<link rel="icon" href="{icon}"><link rel="apple-touch-icon" href="{icon}"><title>MoneyFlow</title>')
+          h=re.sub(r"if\('serviceWorker' in navigator\)\{navigator\.serviceWorker\.register\([^}]+\}\s*",'',h)
+          shim="<script>(function(){document.querySelectorAll('[id]').forEach(function(el){if(!(el.id in window))try{window[el.id]=el}catch(e){}})})();</script>"
+          h=h.replace("<script>const U='https://icfpgikggqhddlvhwbht.supabase.co'",shim+"<script>const U='https://icfpgikggqhddlvhwbht.supabase.co'",1)
+          h=h.replace("logo.src='./icon-512.png?v=9';authLogo.src='./icon-512.png?v=9';",f"logo.src='{icon}';authLogo.src='{icon}';")
+          scripts=[]
+          for n in ['addon-v9.js','ui-polish-v10.js','history-mobile-fix.js','history-fix-v15.js','safe-ui-v20.js','chat-enhance-v1.js']:
+              p=Path(n)
+              if p.exists(): scripts.append('<script>\n'+p.read_text()+'\n</script>')
+          h=h.replace('</body>','\n'.join(scripts)+'</body>')
+          Path('standalone.html').write_text(h)
+          PY
+      - name: Commit standalone bundle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add standalone.html
+          git diff --cached --quiet || git commit -m "[skip ci] Generate standalone MoneyFlow"
+          git push
