@@ -27,7 +27,7 @@ jobs:
           h=h.replace("<script>const U='https://icfpgikggqhddlvhwbht.supabase.co'",shim+"<script>const U='https://icfpgikggqhddlvhwbht.supabase.co'",1)
           h=h.replace("logo.src='./icon-512.png?v=9';authLogo.src='./icon-512.png?v=9';",f"logo.src='{icon}';authLogo.src='{icon}';")
           scripts=[]
-          for n in ['addon-v9.js','ui-polish-v10.js','history-mobile-fix.js','history-fix-v15.js','safe-ui-v20.js','chat-enhance-v1.js']:
+          for n in ['addon-v9.js','ui-polish-v10.js','history-mobile-fix.js','history-fix-v15.js','safe-ui-v20.js','chat-enhance-v1.js','credit-management-v1.js']:
               p=Path(n)
               if p.exists(): scripts.append('<script>\n'+p.read_text()+'\n</script>')
           h=h.replace('</body>','\n'.join(scripts)+'</body>')
